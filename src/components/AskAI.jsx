@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
+import { X, Send, Sparkles, ArrowRight, Loader2, MessageCircle } from 'lucide-react';
+
+const MAX_MESSAGES = 15;
 
 const SECTION_LABELS = {
   about: 'About',
@@ -14,24 +16,11 @@ const SECTION_LABELS = {
 };
 
 const STARTER_QUESTIONS = [
-  "What's Anannya's experience with AI?",
-  "Tell me about her leadership experience",
-  "What products has she shipped?",
-  "What's her technical background?",
+  "What's Anannya's experience with AI products?",
+  "Tell me about her work at Gen Digital",
+  "What's her GCP and data engineering background?",
+  "Has she published any research?",
 ];
-
-function parseSections(text) {
-  const sectionMatch = text.match(/SECTIONS:\s*(.+)$/im);
-  if (!sectionMatch) return { cleanText: text.trim(), sections: [] };
-
-  const cleanText = text.replace(/SECTIONS:\s*(.+)$/im, '').trim();
-  const sections = sectionMatch[1]
-    .split(',')
-    .map((s) => s.trim().toLowerCase())
-    .filter((s) => SECTION_LABELS[s]);
-
-  return { cleanText, sections };
-}
 
 function scrollToSection(sectionId, onClose) {
   onClose();
@@ -54,23 +43,21 @@ function MessageBubble({ message, onClose }) {
     );
   }
 
-  const { cleanText, sections } = parseSections(message.text);
-
   return (
     <div className="flex justify-start mb-4">
       <div className="max-w-[85%]">
         <div className="bg-white/10 text-white/90 px-4 py-2.5 rounded-2xl rounded-bl-md text-sm leading-relaxed whitespace-pre-wrap">
-          {cleanText}
+          {message.text}
         </div>
-        {sections.length > 0 && (
+        {message.sections?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2 ml-1">
-            {sections.map((s) => (
+            {message.sections.map((s) => (
               <button
                 key={s}
                 onClick={() => scrollToSection(s, onClose)}
                 className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 hover:bg-purple-500/40 hover:text-white transition-all cursor-pointer border border-purple-500/30"
               >
-                {SECTION_LABELS[s]}
+                See {SECTION_LABELS[s]}
                 <ArrowRight size={10} />
               </button>
             ))}
@@ -94,12 +81,36 @@ function TypingIndicator() {
   );
 }
 
+function RateLimitMessage({ onClose }) {
+  return (
+    <div className="flex justify-start mb-4">
+      <div className="max-w-[85%]">
+        <div className="bg-white/10 text-white/90 px-4 py-2.5 rounded-2xl rounded-bl-md text-sm leading-relaxed">
+          You&apos;ve been very thorough exploring Anannya&apos;s background! For deeper conversations, feel free to reach out directly.
+        </div>
+        <div className="flex flex-wrap gap-1.5 mt-2 ml-1">
+          <button
+            onClick={() => scrollToSection('contact', onClose)}
+            className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 hover:bg-purple-500/40 hover:text-white transition-all cursor-pointer border border-purple-500/30"
+          >
+            Get in touch
+            <ArrowRight size={10} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AskAI({ isOpen, onClose }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [messageCount, setMessageCount] = useState(0);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  const isRateLimited = messageCount >= MAX_MESSAGES;
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -114,17 +125,18 @@ export default function AskAI({ isOpen, onClose }) {
   const buildHistory = () => {
     return messages.map((m) => ({
       role: m.role === 'user' ? 'user' : 'model',
-      parts: [{ text: m.text }],
+      text: m.text,
     }));
   };
 
   const sendMessage = async (text) => {
-    if (!text.trim() || isLoading) return;
+    if (!text.trim() || isLoading || isRateLimited) return;
 
     const userMessage = { role: 'user', text: text.trim() };
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setMessageCount((c) => c + 1);
 
     try {
       const history = buildHistory();
@@ -134,59 +146,31 @@ export default function AskAI({ isOpen, onClose }) {
         body: JSON.stringify({ message: text.trim(), history }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        throw new Error('Failed to get response');
+        throw new Error(data.error || 'Failed to get response');
       }
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let fullText = '';
-      let buffer = '';
-
-      setMessages((prev) => [...prev, { role: 'assistant', text: '' }]);
-      setIsLoading(false);
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const payload = line.slice(6).trim();
-            if (payload === '[DONE]') continue;
-            try {
-              const data = JSON.parse(payload);
-              if (data.text) {
-                fullText += data.text;
-                const currentText = fullText;
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  updated[updated.length - 1] = {
-                    role: 'assistant',
-                    text: currentText,
-                  };
-                  return updated;
-                });
-              }
-            } catch {
-              // skip malformed chunks
-            }
-          }
-        }
-      }
-    } catch {
-      setIsLoading(false);
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          text: "Sorry, I couldn't get a response right now. Please try again in a moment.",
+          text: data.reply,
+          sections: data.sections || [],
         },
       ]);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          text: err.message || "Sorry, I couldn't get a response right now. Please try again.",
+          sections: [],
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -223,7 +207,7 @@ export default function AskAI({ isOpen, onClose }) {
                 </div>
                 <div>
                   <h3 className="text-white font-semibold text-sm">Ask about Anannya</h3>
-                  <p className="text-white/40 text-xs">Powered by AI</p>
+                  <p className="text-white/40 text-xs">AI-powered -- grounded in real experience</p>
                 </div>
               </div>
               <button
@@ -240,13 +224,13 @@ export default function AskAI({ isOpen, onClose }) {
                 <div className="h-full flex flex-col justify-center">
                   <div className="text-center mb-6">
                     <div className="w-14 h-14 rounded-full bg-purple-600/20 flex items-center justify-center mx-auto mb-3">
-                      <Sparkles size={24} className="text-purple-400" />
+                      <MessageCircle size={24} className="text-purple-400" />
                     </div>
                     <h4 className="text-white font-medium text-base mb-1">
                       Hi! Ask me anything about Anannya
                     </h4>
-                    <p className="text-white/40 text-xs">
-                      Experience, skills, projects, research — I have it all.
+                    <p className="text-white/40 text-xs leading-relaxed max-w-[280px] mx-auto">
+                      Her AI product work, GCP experience, research, skills -- every answer is backed by real examples.
                     </p>
                   </div>
                   <div className="space-y-2">
@@ -267,6 +251,7 @@ export default function AskAI({ isOpen, onClose }) {
                 <MessageBubble key={i} message={msg} onClose={onClose} />
               ))}
               {isLoading && <TypingIndicator />}
+              {isRateLimited && !isLoading && <RateLimitMessage onClose={onClose} />}
               <div ref={messagesEndRef} />
             </div>
 
@@ -281,18 +266,28 @@ export default function AskAI({ isOpen, onClose }) {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask about experience, skills, projects..."
+                  placeholder={
+                    isRateLimited
+                      ? 'Message limit reached -- reach out directly!'
+                      : 'Ask about experience, skills, projects...'
+                  }
                   className="flex-1 bg-transparent text-white text-sm placeholder:text-white/30 outline-none"
-                  disabled={isLoading}
+                  disabled={isLoading || isRateLimited}
+                  maxLength={500}
                 />
                 <button
                   type="submit"
-                  disabled={!input.trim() || isLoading}
+                  disabled={!input.trim() || isLoading || isRateLimited}
                   className="p-1.5 rounded-lg bg-purple-600 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-purple-500 transition-colors"
                 >
                   <Send size={14} />
                 </button>
               </div>
+              {!isRateLimited && (
+                <p className="text-white/20 text-[10px] mt-1.5 text-center">
+                  {MAX_MESSAGES - messageCount} questions remaining this session
+                </p>
+              )}
             </form>
           </motion.div>
         </>
