@@ -6,7 +6,7 @@ export default function Education() {
   const { education } = portfolioData;
 
   return (
-    <section className="py-24 bg-slate-50">
+    <section id="education" className="py-24 bg-slate-50">
       <div className="max-w-4xl mx-auto px-6">
         {/* Section Header */}
         <motion.div

@@ -36,7 +36,7 @@ export default function Skills() {
   const { skills } = portfolioData;
 
   return (
-    <section className="py-24 bg-white">
+    <section id="skills" className="py-24 bg-white">
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header */}
         <motion.div

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Sparkles } from 'lucide-react';
+import AskAI from './AskAI';
 
 const navItems = [
   { label: 'About', href: '#about' },
@@ -14,6 +15,7 @@ const navItems = [
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAskAIOpen, setIsAskAIOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,16 +72,32 @@ export default function Navbar() {
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full" />
               </a>
             ))}
+            <button
+              onClick={() => setIsAskAIOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-600/80 hover:bg-purple-500 text-white text-sm font-medium transition-all hover:scale-105"
+            >
+              <Sparkles size={14} />
+              Ask AI
+            </button>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-white hover:text-white/80 transition-colors"
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {/* Mobile Buttons */}
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              onClick={() => setIsAskAIOpen(true)}
+              className="p-2 text-purple-400 hover:text-purple-300 transition-colors"
+              aria-label="Ask AI"
+            >
+              <Sparkles size={20} />
+            </button>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-white hover:text-white/80 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -111,6 +129,8 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AskAI isOpen={isAskAIOpen} onClose={() => setIsAskAIOpen(false)} />
     </motion.nav>
   );
 }
