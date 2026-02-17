@@ -77,7 +77,7 @@ export default function Navbar() {
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-600/80 hover:bg-purple-500 text-white text-sm font-medium transition-all hover:scale-105"
             >
               <Sparkles size={14} />
-              Ask AI
+              Ask Anannya
             </button>
           </div>
 
