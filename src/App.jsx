@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import BentoHero from './components/BentoHero';
 import CompanyLogos from './components/CompanyLogos';
@@ -14,6 +14,12 @@ import Contact from './components/Contact';
 function App() {
   const [activeTab, setActiveTab] = useState('all');
 
+  useEffect(() => {
+    const handleSwitchTab = (e) => setActiveTab(e.detail);
+    window.addEventListener('switch-tab', handleSwitchTab);
+    return () => window.removeEventListener('switch-tab', handleSwitchTab);
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -27,8 +33,10 @@ function App() {
         {/* Instagram-Style Profile Section */}
         <InstagramProfile />
         <StoryHighlights />
-        <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
-        <ProjectGrid activeTab={activeTab} />
+        <div id="profile-tabs">
+          <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
+          <ProjectGrid activeTab={activeTab} />
+        </div>
         
         {/* Original sections - unchanged from here */}
         <Timeline />

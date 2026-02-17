@@ -3,13 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Sparkles } from 'lucide-react';
 import AskAI from './AskAI';
 
+const TAB_NAV = {
+  Work: 'professional',
+  Research: 'research',
+  Projects: 'academic',
+};
+
 const navItems = [
   { label: 'About', href: '#about' },
-  { label: 'Work', href: '#work' },
-  { label: 'Research', href: '#research' },
-  { label: 'Projects', href: '#projects' },
+  { label: 'Work', href: '#profile-tabs' },
+  { label: 'Research', href: '#profile-tabs' },
+  { label: 'Projects', href: '#profile-tabs' },
   { label: 'Experience', href: '#experience' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Contact', href: 'mailto:anannya.chuli@duke.edu' },
 ];
 
 export default function Navbar() {
@@ -25,13 +31,24 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToSection = (e, href) => {
+  const handleNavClick = (e, item) => {
     e.preventDefault();
-    const element = document.querySelector(href);
+    setIsMobileMenuOpen(false);
+
+    if (item.label === 'Contact') {
+      window.location.href = item.href;
+      return;
+    }
+
+    const tabId = TAB_NAV[item.label];
+    if (tabId) {
+      window.dispatchEvent(new CustomEvent('switch-tab', { detail: tabId }));
+    }
+
+    const element = document.querySelector(item.href);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
-    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -47,25 +64,13 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo/Name */}
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="text-lg font-bold text-white hover:text-white/80 transition-colors"
-          >
-            AC
-          </a>
-
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navItems.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
-                onClick={(e) => scrollToSection(e, item.href)}
+                onClick={(e) => handleNavClick(e, item)}
                 className="text-sm font-medium text-white/90 hover:text-white transition-colors relative group"
               >
                 {item.label}
@@ -116,7 +121,7 @@ export default function Navbar() {
                 <motion.a
                   key={item.label}
                   href={item.href}
-                  onClick={(e) => scrollToSection(e, item.href)}
+                  onClick={(e) => handleNavClick(e, item)}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
