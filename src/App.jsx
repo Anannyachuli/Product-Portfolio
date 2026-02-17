@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
+import AskAI from './components/AskAI';
 import BentoHero from './components/BentoHero';
 import CompanyLogos from './components/CompanyLogos';
 import InstagramProfile from './components/InstagramProfile';
@@ -23,6 +24,7 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
+      <AskAI />
       <main>
         {/* Bento Hero - unchanged */}
         <BentoHero />
