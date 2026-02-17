@@ -117,7 +117,7 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('Chat API error:', err.message, err.code ?? '');
     return res.status(500).json({
-      error: 'Something went wrong. Please try again in a moment.',
+      error: `Something went wrong: ${err.message || 'Unknown error'}`,
     });
   }
 }
