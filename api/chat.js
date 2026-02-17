@@ -74,7 +74,7 @@ export default async function handler(req, res) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash',
       systemInstruction: SYSTEM_PROMPT,
     });
 
@@ -117,7 +117,7 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('Chat API error:', err.message, err.code ?? '');
     return res.status(500).json({
-      error: `Something went wrong: ${err.message || 'Unknown error'}`,
+      error: 'Something went wrong. Please try again in a moment.',
     });
   }
 }
