@@ -56,7 +56,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY || process.env.Portfolio_gemini_key;
+  const apiKey =
+    process.env.GEMINI_API_KEY ||
+    process.env.Portfolio_gemini_key ||
+    process.env.PORTFOLIO_GEMINI_KEY;
   if (!apiKey) {
     return res.status(500).json({ error: 'AI service not configured. Please try again later.' });
   }
