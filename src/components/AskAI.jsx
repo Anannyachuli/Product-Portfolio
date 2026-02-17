@@ -197,19 +197,10 @@ export default function AskAI() {
     const showTimer = setTimeout(() => {
       setChatState('toast');
       sessionStorage.setItem('askAI_greeted', '1');
-    }, 3000);
+    }, 500);
 
     return () => clearTimeout(showTimer);
   }, []);
-
-  useEffect(() => {
-    if (chatState === 'toast') {
-      const autoDismiss = setTimeout(() => {
-        setChatState('fab');
-      }, 12000);
-      return () => clearTimeout(autoDismiss);
-    }
-  }, [chatState]);
 
   useEffect(() => {
     if (chatState === 'open' && inputRef.current) {
