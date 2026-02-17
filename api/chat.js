@@ -74,7 +74,7 @@ export default async function handler(req, res) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-1.5-flash',
       systemInstruction: SYSTEM_PROMPT,
     });
 
@@ -85,7 +85,17 @@ export default async function handler(req, res) {
 
     const chat = model.startChat({ history: chatHistory });
     const result = await chat.sendMessage(validation.message);
-    const responseText = result.response.text();
+
+    const parts = result.response.candidates?.[0]?.content?.parts;
+    let responseText =
+      parts?.length && parts[0].text != null
+        ? String(parts[0].text)
+        : '';
+
+    if (!responseText.trim()) {
+      responseText =
+        "I couldn't generate a reply for that. Try rephrasing or asking something else about Anannya's experience, skills, or projects.";
+    }
 
     const sectionMatch = responseText.match(/SECTIONS:\s*(.+)$/im);
     let reply = responseText;
@@ -105,7 +115,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ reply, sections });
   } catch (err) {
-    console.error('Chat API error:', err);
+    console.error('Chat API error:', err.message, err.code ?? '');
     return res.status(500).json({
       error: 'Something went wrong. Please try again in a moment.',
     });
