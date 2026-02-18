@@ -188,15 +188,8 @@ export default function AskAI() {
   const isRateLimited = messageCount >= MAX_MESSAGES;
 
   useEffect(() => {
-    const alreadyShown = sessionStorage.getItem('askAI_greeted');
-    if (alreadyShown) {
-      setChatState('fab');
-      return;
-    }
-
     const showTimer = setTimeout(() => {
       setChatState('toast');
-      sessionStorage.setItem('askAI_greeted', '1');
     }, 500);
 
     return () => clearTimeout(showTimer);
