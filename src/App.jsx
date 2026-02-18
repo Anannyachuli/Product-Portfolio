@@ -14,6 +14,7 @@ import Contact from './components/Contact';
 
 function App() {
   const [activeTab, setActiveTab] = useState('all');
+  const [panelOpen, setPanelOpen] = useState(false);
 
   useEffect(() => {
     const handleSwitchTab = (e) => setActiveTab(e.detail);
@@ -21,8 +22,14 @@ function App() {
     return () => window.removeEventListener('switch-tab', handleSwitchTab);
   }, []);
 
+  useEffect(() => {
+    const handlePanelToggle = (e) => setPanelOpen(e.detail);
+    window.addEventListener('chat-panel-toggle', handlePanelToggle);
+    return () => window.removeEventListener('chat-panel-toggle', handlePanelToggle);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className={`min-h-screen bg-white transition-[padding] duration-300 ease-in-out ${panelOpen ? 'sm:pr-[420px]' : 'pr-0'}`}>
       <Navbar />
       <AskAI />
       <main>

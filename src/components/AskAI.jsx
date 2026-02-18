@@ -213,7 +213,10 @@ export default function AskAI() {
   }, [messages, isLoading]);
 
   useEffect(() => {
-    const handleOpen = () => setChatState('open');
+    const handleOpen = () => {
+      setChatState('open');
+      window.dispatchEvent(new CustomEvent('chat-panel-toggle', { detail: true }));
+    };
     window.addEventListener('open-ask-ai', handleOpen);
     return () => window.removeEventListener('open-ask-ai', handleOpen);
   }, []);
@@ -275,9 +278,18 @@ export default function AskAI() {
     sendMessage(input);
   };
 
-  const openPanel = () => setChatState('open');
-  const minimize = () => setChatState('fab');
-  const close = () => setChatState('fab');
+  const openPanel = () => {
+    setChatState('open');
+    window.dispatchEvent(new CustomEvent('chat-panel-toggle', { detail: true }));
+  };
+  const minimize = () => {
+    setChatState('fab');
+    window.dispatchEvent(new CustomEvent('chat-panel-toggle', { detail: false }));
+  };
+  const close = () => {
+    setChatState('fab');
+    window.dispatchEvent(new CustomEvent('chat-panel-toggle', { detail: false }));
+  };
   const dismissToast = () => setChatState('fab');
 
   return (
