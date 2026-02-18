@@ -102,55 +102,55 @@ function RateLimitMessage() {
 function WelcomeToast({ onChat, onDismiss }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      initial={{ opacity: 0, y: 60, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      transition={{ type: 'spring', damping: 20, stiffness: 200 }}
-      className="fixed bottom-6 right-6 z-[70] w-[340px] max-w-[calc(100vw-3rem)]"
+      exit={{ opacity: 0, y: 30, scale: 0.9 }}
+      transition={{ type: 'spring', damping: 14, stiffness: 160, mass: 0.8 }}
+      className="fixed bottom-8 right-8 z-[70] w-[400px] max-w-[calc(100vw-3rem)]"
     >
-      <div className="bg-[#1a1225] border border-white/10 rounded-2xl shadow-2xl p-5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent pointer-events-none" />
+      <div className="bg-[#1a1225] border border-purple-500/25 rounded-2xl shadow-[0_8px_40px_rgba(124,58,237,0.25)] p-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/15 via-purple-500/5 to-transparent pointer-events-none" />
 
         <button
           onClick={onDismiss}
-          className="absolute top-3 right-3 p-1 rounded-full text-white/30 hover:text-white/70 hover:bg-white/10 transition-colors"
+          className="absolute top-4 right-4 p-1.5 rounded-full text-white/30 hover:text-white/70 hover:bg-white/10 transition-colors"
         >
-          <X size={14} />
+          <X size={16} />
         </button>
 
-        <div className="relative flex items-start gap-3.5">
-          <div className="w-10 h-10 rounded-full bg-purple-600/30 flex items-center justify-center shrink-0 mt-0.5">
+        <div className="relative flex items-start gap-4">
+          <div className="w-12 h-12 rounded-full bg-purple-600/30 ring-2 ring-purple-500/30 flex items-center justify-center shrink-0 mt-0.5">
             <img
               src="/images/profile.png"
               alt="Anannya"
-              className="w-10 h-10 rounded-full object-cover"
+              className="w-12 h-12 rounded-full object-cover"
               onError={(e) => {
                 e.target.style.display = 'none';
-                e.target.parentElement.innerHTML = '<span class="text-purple-400 text-sm font-bold">AC</span>';
+                e.target.parentElement.innerHTML = '<span class="text-purple-400 font-bold">AC</span>';
               }}
             />
           </div>
           <div>
-            <p className="text-white text-sm font-medium leading-relaxed">
+            <p className="text-white text-base font-semibold leading-relaxed">
               Hey! I&apos;m Anannya
             </p>
-            <p className="text-white/50 text-xs leading-relaxed mt-1">
-              If you have any questions about my experience or want to know something specific, let&apos;s chat!
+            <p className="text-white/55 text-sm leading-relaxed mt-1.5">
+              Have questions about my experience, skills, or projects? I&apos;d love to help -- let&apos;s chat!
             </p>
           </div>
         </div>
 
-        <div className="relative flex gap-2 mt-4">
+        <div className="relative flex gap-3 mt-5">
           <button
             onClick={onChat}
-            className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium transition-all"
+            className="flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium transition-all hover:shadow-lg hover:shadow-purple-600/20"
           >
-            <MessageCircle size={12} />
+            <MessageCircle size={15} />
             Let&apos;s Chat
           </button>
           <button
             onClick={onDismiss}
-            className="flex-1 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/50 hover:text-white/70 text-xs font-medium transition-all border border-white/5"
+            className="flex-1 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/50 hover:text-white/70 text-sm font-medium transition-all border border-white/10"
           >
             Maybe Later
           </button>
